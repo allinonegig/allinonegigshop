@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>AllInOneGig Shop</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  /* ===== Colours follow the customer's Telegram theme (light or dark) automatically ===== */
+  :root {
+    --bg: var(--tg-theme-bg-color, #0f1115);
+    --card: var(--tg-theme-secondary-bg-color, #1a1d24);
+    --text: var(--tg-theme-text-color, #f2f3f5);
+    --hint: var(--tg-theme-hint-color, #8b919c);
+    --accent: var(--tg-theme-button-color, #2f81f7);
+    --accent-text: var(--tg-theme-button-text-color, #ffffff);
+    --line: color-mix(in srgb, var(--hint) 22%, transparent);
+    --soft: color-mix(in srgb, var(--accent) 14%, transparent);
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  body { padding: 0 16px calc(96px + env(safe-area-inset-bottom)); max-width: 560px; margin: 0 auto; }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+
+  header { display: flex; align-items: center; gap: 12px; padding: 18px 0 14px; }
+  .logo { width: 44px; height: 44px; border-radius: 13px; flex: none; display: grid; place-items: center;
+    background: var(--accent); color: var(--accent-text); font-weight: 800; letter-spacing: -.5px; font-size: 15px; }
+  header h1 { margin: 0; font-size: 18px; letter-spacing: -.2px; }
+  header p { margin: 1px 0 0; color: var(--hint); font-size: 13px; }
+
+  .crumb { display: flex; align-items: center; gap: 8px; padding: 14px 0 6px; }
+  .crumb button { width: 34px; height: 34px; border-radius: 50%; background: var(--card); display: grid; place-items: center; }
+  .crumb h2 { margin: 0; font-size: 19px; letter-spacing: -.2px; }
+
+  .section { margin: 18px 0 8px; color: var(--hint); font-size: 12.5px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .6px; }
+  .card { width: 100%; display: flex; align-items: center; gap: 14px; padding: 14px; margin-bottom: 10px;
+    background: var(--card); border-radius: var(--radius); transition: transform .12s ease; }
+  .card:active { transform: scale(.985); }
+  .icon { width: 46px; height: 46px; flex: none; border-radius: 13px; background: var(--soft);
+    display: grid; place-items: center; font-size: 23px; }
+  .card .body { flex: 1; min-width: 0; }
+  .card .title { font-weight: 600; }
+  .card .sub { color: var(--hint); font-size: 13px; margin-top: 1px; }
+  .price { flex: none; font-weight: 700; font-size: 14px; color: var(--accent); }
+  .chev { flex: none; color: var(--hint); }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .tile { background: var(--card); border-radius: var(--radius); padding: 14px 12px; display: flex;
+    flex-direction: column; gap: 6px; transition: transform .12s ease; }
+  .tile:active { transform: scale(.97); }
+  .tile .flag { font-size: 30px; line-height: 1; }
+  .tile .name { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tile .price { font-size: 13px; }
+
+  .search { position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 8px 0 4px; }
+  .search input { width: 100%; height: 44px; border-radius: 12px; border: 1px solid var(--line);
+    background: var(--card); color: var(--text); font: inherit; padding: 0 14px 0 40px; outline: none; }
+  .search input:focus { border-color: var(--accent); }
+  .search svg { position: absolute; left: 13px; top: 21px; color: var(--hint); }
+  .list { background: var(--card); border-radius: var(--radius); overflow: hidden; }
+  .row { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .row:last-child { border-bottom: 0; }
+  .row .flag { font-size: 22px; }
+  .row .name { flex: 1; }
+  .empty { color: var(--hint); text-align: center; padding: 28px 0; }
+
+  .hero { text-align: center; padding: 18px 0 8px; }
+  .hero .flag { font-size: 56px; line-height: 1.1; }
+  .hero h2 { margin: 10px 0 6px; font-size: 21px; letter-spacing: -.3px; }
+  .pill { display: inline-block; padding: 5px 12px; border-radius: 999px; background: var(--soft);
+    color: var(--accent); font-weight: 700; }
+  .box { background: var(--card); border-radius: var(--radius); padding: 14px 16px; margin-top: 14px; }
+  .box p { margin: 0 0 8px; }
+  .box ul { margin: 0; padding-left: 18px; }
+  .box li { margin: 4px 0; }
+  .steps { counter-reset: s; list-style: none; padding: 0 !important; }
+  .steps li { counter-increment: s; display: flex; gap: 10px; align-items: flex-start; margin: 10px 0 !important; }
+  .steps li::before { content: counter(s); flex: none; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--accent); color: var(--accent-text); font-size: 13px; font-weight: 700; display: grid; place-items: center; }
+  .foot { color: var(--hint); font-size: 12.5px; text-align: center; margin: 22px 0 0; }
+
+  /* Fallback buy button, only shown when the page is opened outside Telegram */
+  .buy { position: fixed; left: 16px; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); max-width: 528px;
+    margin: 0 auto; height: 50px; border-radius: 14px; background: var(--accent); color: var(--accent-text);
+    font-weight: 700; text-align: center; display: none; }
+  .view { animation: in .18s ease; }
+  @keyframes in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<button class="buy" id="fallbackBuy"></button>
+
+<script>
+/* ======================= EDIT TEXT HERE =======================
+   Prices and countries come from bot.py automatically.
+   Names and descriptions below are what customers see on this page. */
+const SHOP = {
+  name: "AllInOneGig Shop",
+  tagline: "Proxies & digital services · Pay with USDT",
+  names: {
+    mob: "Static mobile proxy",
+    res: "Static residential proxy",
+    idv: "ID verification service",
+    test: "TEST - payment check",
+  },
+  desc: {
+    mob: c => [`A static IP address from a real mobile network in ${c}.`,
+      ["Mobile IPs have the highest trust on social media and app platforms",
+       "The IP stays the same for your sessions",
+       "Delivered in your Telegram chat once payment is confirmed"]],
+    res: c => [`Your own static residential IP address in ${c}, from a real home internet provider.`,
+      ["The IP stays the same, so your sessions look consistent",
+       "Residential IPs are trusted by most websites and apps",
+       "Delivered in your Telegram chat once payment is confirmed"]],
+    idv: () => ["Get help verifying your own identity on a platform.",
+      ["After payment, the bot asks for the country you're from and a clear photo of your face",
+       "The seller then guides you through the rest in chat"]],
+    test: () => ["Admin-only test product to check payments end to end.", []],
+  },
+};
+/* ============================================================== */
+
+const COUNTRIES = {"AF":"Afghanistan","AL":"Albania","DZ":"Algeria","AD":"Andorra","AO":"Angola","AG":"Antigua and Barbuda","AR":"Argentina","AM":"Armenia","AU":"Australia","AT":"Austria","AZ":"Azerbaijan","BS":"Bahamas","BH":"Bahrain","BD":"Bangladesh","BB":"Barbados","BY":"Belarus","BE":"Belgium","BZ":"Belize","BJ":"Benin","BT":"Bhutan","BO":"Bolivia","BA":"Bosnia and Herzegovina","BW":"Botswana","BR":"Brazil","BN":"Brunei","BG":"Bulgaria","BF":"Burkina Faso","BI":"Burundi","KH":"Cambodia","CM":"Cameroon","CA":"Canada","CV":"Cape Verde","CF":"Central African Republic","TD":"Chad","CL":"Chile","CN":"China","CO":"Colombia","KM":"Comoros","CG":"Congo","CD":"DR Congo","CR":"Costa Rica","CI":"Cote d'Ivoire","HR":"Croatia","CU":"Cuba","CY":"Cyprus","CZ":"Czech Republic","DK":"Denmark","DJ":"Djibouti","DM":"Dominica","DO":"Dominican Republic","EC":"Ecuador","EG":"Egypt","SV":"El Salvador","GQ":"Equatorial Guinea","ER":"Eritrea","EE":"Estonia","SZ":"Eswatini","ET":"Ethiopia","FJ":"Fiji","FI":"Finland","FR":"France","GA":"Gabon","GM":"Gambia","GE":"Georgia","DE":"Germany","GH":"Ghana","GR":"Greece","GD":"Grenada","GT":"Guatemala","GN":"Guinea","GW":"Guinea-Bissau","GY":"Guyana","HT":"Haiti","HN":"Honduras","HK":"Hong Kong","HU":"Hungary","IS":"Iceland","IN":"India","ID":"Indonesia","IR":"Iran","IQ":"Iraq","IE":"Ireland","IL":"Israel","IT":"Italy","JM":"Jamaica","JP":"Japan","JO":"Jordan","KZ":"Kazakhstan","KE":"Kenya","KI":"Kiribati","KW":"Kuwait","KG":"Kyrgyzstan","LA":"Laos","LV":"Latvia","LB":"Lebanon","LS":"Lesotho","LR":"Liberia","LY":"Libya","LI":"Liechtenstein","LT":"Lithuania","LU":"Luxembourg","MO":"Macau","MG":"Madagascar","MW":"Malawi","MY":"Malaysia","MV":"Maldives","ML":"Mali","MT":"Malta","MH":"Marshall Islands","MR":"Mauritania","MU":"Mauritius","MX":"Mexico","FM":"Micronesia","MD":"Moldova","MC":"Monaco","MN":"Mongolia","ME":"Montenegro","MA":"Morocco","MZ":"Mozambique","MM":"Myanmar","NA":"Namibia","NR":"Nauru","NP":"Nepal","NL":"Netherlands","NZ":"New Zealand","NI":"Nicaragua","NE":"Niger","NG":"Nigeria","KP":"North Korea","MK":"North Macedonia","NO":"Norway","OM":"Oman","PK":"Pakistan","PW":"Palau","PS":"Palestine","PA":"Panama","PG":"Papua New Guinea","PY":"Paraguay","PE":"Peru","PH":"Philippines","PL":"Poland","PT":"Portugal","PR":"Puerto Rico","QA":"Qatar","RO":"Romania","RU":"Russia","RW":"Rwanda","KN":"Saint Kitts and Nevis","LC":"Saint Lucia","VC":"Saint Vincent and the Grenadines","WS":"Samoa","SM":"San Marino","ST":"Sao Tome and Principe","SA":"Saudi Arabia","SN":"Senegal","RS":"Serbia","SC":"Seychelles","SL":"Sierra Leone","SG":"Singapore","SK":"Slovakia","SI":"Slovenia","SB":"Solomon Islands","SO":"Somalia","ZA":"South Africa","KR":"South Korea","SS":"South Sudan","ES":"Spain","LK":"Sri Lanka","SD":"Sudan","SR":"Suriname","SE":"Sweden","CH":"Switzerland","SY":"Syria","TW":"Taiwan","TJ":"Tajikistan","TZ":"Tanzania","TH":"Thailand","TL":"Timor-Leste","TG":"Togo","TO":"Tonga","TT":"Trinidad and Tobago","TN":"Tunisia","TR":"Turkey","TM":"Turkmenistan","TV":"Tuvalu","UG":"Uganda","UA":"Ukraine","AE":"United Arab Emirates","GB":"United Kingdom","US":"United States","UY":"Uruguay","UZ":"Uzbekistan","VU":"Vanuatu","VA":"Vatican City","VE":"Venezuela","VN":"Vietnam","YE":"Yemen","ZM":"Zambia","ZW":"Zimbabwe"};
+const THE = new Set(["US","GB","NL","AE","PH","BS","CZ","DO","CF","CD","GM","MH","SB"]);
+
+const tg = window.Telegram && window.Telegram.WebApp;
+const inTelegram = !!(tg && tg.initData);
+const qs = new URLSearchParams(location.search);
+const num = (k, d) => { const v = parseFloat(qs.get(k)); return isNaN(v) ? d : v; };
+const list = (k, d) => (qs.get(k) || d).split(",").map(s => s.trim().toUpperCase()).filter(c => COUNTRIES[c]);
+const PRICE = { res: num("res", 17.5), mob: num("mob", 45.5), idv: num("idv", 42), test: num("test", 0) };
+const MOB = list("mobc", "US,GB,CA,AU");
+const TOP = list("top", "US,GB,CA,DE,FR,AU");
+const ALL = Object.keys(COUNTRIES).sort((a, b) => COUNTRIES[a].localeCompare(COUNTRIES[b]));
+
+const $app = document.getElementById("app");
+const $fallback = document.getElementById("fallbackBuy");
+const usd = n => "$" + n.toFixed(2);
+const flag = cc => cc.replace(/./g, ch => String.fromCodePoint(0x1F1E6 + ch.charCodeAt(0) - 65));
+const place = cc => (THE.has(cc) ? "the " : "") + COUNTRIES[cc];
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+const haptic = () => { try { tg.HapticFeedback.selectionChanged(); } catch (e) {} };
+const chev = `<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>`;
+
+let stack = [];
+let buyAction = null;
+
+function setBuy(label, action) {
+  buyAction = action;
+  if (inTelegram) {
+    if (label) { tg.MainButton.setText(label); tg.MainButton.show(); } else tg.MainButton.hide();
+  } else {
+    $fallback.textContent = label || "";
+    $fallback.style.display = label ? "block" : "none";
+  }
+}
+
+function send(payload) {
+  if (inTelegram) { tg.sendData(JSON.stringify(payload)); }   // closes the page; the bot continues in chat
+  else alert("Open this page from the Shop button in the bot to order.\n\n" + JSON.stringify(payload));
+}
+
+function go(view, ...args) { stack.push([view, args]); render(); }
+function back() { if (stack.length > 1) { stack.pop(); render(); } }
+
+function render() {
+  const [view, args] = stack[stack.length - 1];
+  setBuy(null);
+  $app.innerHTML = `<div class="view">${VIEWS[view](...args)}</div>`;
+  window.scrollTo(0, 0);
+  if (inTelegram) { stack.length > 1 ? tg.BackButton.show() : tg.BackButton.hide(); }
+  if (AFTER[view]) AFTER[view](...args);
+}
+
+function crumb(title) {
+  return `<div class="crumb">${inTelegram ? "" :
+    `<button onclick="back()" aria-label="Back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>`}
+    <h2>${esc(title)}</h2></div>`;
+}
+
+function card({ icon, title, sub, price, onclick }) {
+  return `<button class="card" onclick="${onclick}">
+    <div class="icon">${icon}</div>
+    <div class="body"><div class="title">${esc(title)}</div><div class="sub">${esc(sub)}</div></div>
+    ${price ? `<div class="price">${price}</div>` : ""}${chev}</button>`;
+}
+
+function tile(kind, cc) {
+  return `<button class="tile" onclick="haptic();go('detail','${kind}','${cc}')">
+    <span class="flag">${flag(cc)}</span><span class="name">${esc(COUNTRIES[cc])}</span>
+    <span class="price">${usd(PRICE[kind])}</span></button>`;
+}
+
+function rows(codes) {
+  if (!codes.length) return `<div class="empty">No country found. Try another name.</div>`;
+  return `<div class="list">${codes.map(cc => `<button class="row" onclick="haptic();go('detail','res','${cc}')">
+    <span class="flag">${flag(cc)}</span><span class="name">${esc(COUNTRIES[cc])}</span>${chev}</button>`).join("")}</div>`;
+}
+
+const ALIASES = { usa: "US", america: "US", uk: "GB", england: "GB", britain: "GB", uae: "AE",
+  dubai: "AE", holland: "NL", korea: "KR", "ivory coast": "CI", czechia: "CZ" };
+function search(q) {
+  q = q.trim().toLowerCase();
+  if (!q) return ALL;
+  if (ALIASES[q]) return [ALIASES[q]];
+  return ALL.filter(cc => COUNTRIES[cc].toLowerCase().includes(q) || cc.toLowerCase() === q);
+}
+
+const VIEWS = {
+  home: () => `
+    <header><div class="logo">AIO</div><div><h1>${esc(SHOP.name)}</h1><p>${esc(SHOP.tagline)}</p></div></header>
+    <div class="section">Proxies</div>
+    ${card({ icon: "📶", title: SHOP.names.mob, sub: `${MOB.length} countries · ${MOB.map(flag).join(" ")}`,
+             price: usd(PRICE.mob), onclick: "haptic();go('mob')" })}
+    ${card({ icon: "🏠", title: SHOP.names.res, sub: "Any country · search 199 locations",
+             price: usd(PRICE.res), onclick: "haptic();go('res')" })}
+    <div class="section">Marketplace</div>
+    ${card({ icon: "🪪", title: SHOP.names.idv, sub: "Help verifying your own identity",
+             price: usd(PRICE.idv), onclick: "haptic();go('detail','idv')" })}
+    ${PRICE.test ? card({ icon: "🧪", title: SHOP.names.test, sub: "Only you can see this",
+             price: usd(PRICE.test), onclick: "haptic();go('detail','test')" }) : ""}
+    <div class="section">Help</div>
+    ${card({ icon: "💬", title: "Talk to support", sub: "Message the seller in chat", onclick: "haptic();send({a:'support'})" })}
+    <p class="foot">Pay with USDT on BEP20 · Your order is delivered in this Telegram chat</p>`,
+
+  mob: () => `${crumb(SHOP.names.mob)}
+    <p style="color:var(--hint);margin:2px 0 14px">Choose a country</p>
+    <div class="grid">${MOB.map(cc => tile("mob", cc)).join("")}</div>`,
+
+  res: () => `${crumb(SHOP.names.res)}
+    <div class="search" style="position:sticky">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Search any country" autocomplete="off">
+    </div>
+    <div id="results">
+      <div class="section">Top countries</div>
+      <div class="grid">${TOP.map(cc => tile("res", cc)).join("")}</div>
+      <div class="section">All countries</div>
+      ${rows(ALL)}
+    </div>`,
+
+  detail: (kind, cc) => {
+    const [intro, points] = SHOP.desc[kind](cc ? place(cc) : "");
+    const title = cc ? `${SHOP.names[kind]} - ${COUNTRIES[cc]}` : SHOP.names[kind];
+    const icon = cc ? flag(cc) : kind === "idv" ? "🪪" : "🧪";
+    return `${crumb(cc ? COUNTRIES[cc] : SHOP.names[kind])}
+      <div class="hero"><div class="flag">${icon}</div><h2>${esc(title)}</h2><span class="pill">${usd(PRICE[kind])}</span></div>
+      <div class="box"><p>${esc(intro)}</p>${points.length ? `<ul>${points.map(p => `<li>${esc(p)}</li>`).join("")}</ul>` : ""}</div>
+      <div class="box"><div style="font-weight:600;margin-bottom:2px">How it works</div>
+        <ul class="steps">
+          <li><span>Tap <b>Buy now</b>. Your order opens in the chat.</span></li>
+          <li><span>Send ${usd(PRICE[kind])} USDT on BEP20, then paste your TxID.</span></li>
+          <li><span>${kind === "idv" ? "Send your country and photo, and the seller guides you." : "Your order is delivered right in the chat."}</span></li>
+        </ul></div>`;
+  },
+};
+
+const AFTER = {
+  res: () => {
+    const $q = document.getElementById("q"), $r = document.getElementById("results");
+    const full = $r.innerHTML;
+    $q.addEventListener("input", () => {
+      $r.innerHTML = $q.value.trim() ? `<div class="section">Results</div>${rows(search($q.value))}` : full;
+    });
+  },
+  detail: (kind, cc) => setBuy(`Buy now · ${usd(PRICE[kind])}`, () => send({ a: "buy", k: kind, c: cc || null })),
+};
+
+$fallback.addEventListener("click", () => buyAction && buyAction());
+if (inTelegram) {
+  tg.ready();
+  tg.expand();
+  tg.MainButton.onClick(() => buyAction && buyAction());
+  tg.BackButton.onClick(back);
+}
+go("home");
+</script>
+</body>
+</html>
